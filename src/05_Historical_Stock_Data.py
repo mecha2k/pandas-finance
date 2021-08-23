@@ -3,6 +3,8 @@ import numpy as np
 import yfinance as yf
 import mplfinance as mpf
 import matplotlib.pyplot as plt
+import scipy.stats as stats
+
 from datetime import datetime
 from icecream import ic
 
@@ -149,85 +151,48 @@ if __name__ == "__main__":
     ic(cum_daily_return.iloc[:, :2][:5])
 
     # plot all the cumulative returns
-    cum_daily_return.plot(figsize=(12, 8))
+    cum_daily_return.plot(figsize=(6, 4))
     _ = plt.legend(loc=2)
     plt.savefig("images/5104OS_05_08.png", bbox_inches="tight", dpi=300)
 
-    # # ## Analyzing distribution of returns
-    #
-    # # In[27]:
-    #
-    #
-    # # plot daily % change values histogram for AAPL using 50 bins
-    # aapl = daily_pct_change['AAPL']
-    # _ = aapl.hist(bins=50, figsize=(12,8));
-    # plt.savefig('5104OS_05_09.png', bbox_inches='tight', dpi=300)
-    #
-    #
-    # # In[28]:
-    #
-    #
-    # # get descriptive statistics
-    # aapl.describe()
-    #
-    #
-    # # In[29]:
-    #
-    #
-    # aapl.describe(percentiles=[0.025, 0.5, 0.975])
-    #
-    #
-    # # In[30]:
-    #
-    #
+    ## Analyzing distribution of returns
+    # plot daily % change values histogram for AAPL using 50 bins
+    aapl = daily_pct_change["AAPL"]
+    ic(aapl.head())
+    # _ = aapl.hist(bins=50, figsize=(6, 4))
+    # plt.savefig("images/5104OS_05_09.png", bbox_inches="tight", dpi=300)
+
+    aapl.describe()
+    aapl.describe(percentiles=[0.025, 0.5, 0.975])
+
     # # plot all the cumulative return distributions
-    # _ = daily_pct_change.hist(bins=50, sharex=True, figsize=(12,8));
-    # plt.savefig('5104OS_05_10.png', bbox_inches='tight', dpi=300)
+    # _ = daily_pct_change.hist(bins=50, sharex=True, figsize=(6, 4))
+    # plt.savefig("images/5104OS_05_10.png", bbox_inches="tight", dpi=300)
     #
-    #
-    # # ### QQ-Plots
-    #
-    # # In[31]:
-    #
-    #
+    # ### QQ-Plots
     # # create a qq-plot of AAPl returns vs normal
-    # import scipy.stats as stats
-    # f = plt.figure(figsize=(12,8))
+    # f = plt.figure(figsize=(6, 4))
     # ax = f.add_subplot(111)
-    # stats.probplot(aapl, dist='norm', plot=ax)
-    # plt.show();
-    # plt.savefig('5104OS_05_11.png', dpi=300)
+    # stats.probplot(aapl, dist="norm", plot=ax)
+    # plt.savefig("images/5104OS_05_11.png", dpi=300)
     #
-    #
-    # # ### Box and whisker plots
-    #
-    # # In[32]:
-    #
-    #
+    # ## Box and whisker plots
     # # create a box and whisker for the AAPL returns
-    # _ = daily_pct_change[['AAPL']].plot(kind='box', figsize=(3,6));
-    # plt.savefig('5104OS_05_12.png', dpi=300)
-    #
-    #
-    # # In[33]:
-    #
+    # _ = daily_pct_change[["AAPL"]].plot(kind="box", figsize=(3, 6))
+    # plt.savefig("images/5104OS_05_12.png", dpi=300)
     #
     # # examine all the returns
-    # daily_pct_change.plot(kind='box', figsize=(12,8));
-    # plt.savefig('5104OS_05_13.png', dpi=300)
+    # daily_pct_change.plot(kind="box", figsize=(6, 4))
+    # plt.savefig("images/5104OS_05_13.png", dpi=300)
     #
+    # ## Comparison of daily percentage change between stocks
     #
-    # # ## Comparison of daily percentage change between stocks
-    #
-    # # In[34]:
-    #
-    #
-    # def render_scatter_plot(data, x_stock_name,
-    #                         y_stock_name, xlim=None, ylim=None):
-    #     fig = plt.figure(figsize=(12,8))
+    # def render_scatter_plot(data, x_stock_name, y_stock_name, xlim=None, ylim=None):
+    #     fig = plt.figure(figsize=(6, 4))
     #     ax = fig.add_subplot(111)
     #     ax.scatter(data[x_stock_name], data[y_stock_name])
-    #     if xlim is not None: ax.set_xlim(xlim)
+    #     if xlim is not None:
+    #         ax.set_xlim(xlim)
     #     ax.autoscale(False)
     #     # horiz and v lines at 0
     #     ax.vlines(0, -10, 10)
@@ -238,208 +203,106 @@ if __name__ == "__main__":
     #     ax.set_xlabel(x_stock_name)
     #     ax.set_ylabel(y_stock_name)
     #
-    #
-    # # In[35]:
-    #
-    #
     # # MSFT vs AAPL
     # limits = [-0.15, 0.15]
-    # render_scatter_plot(daily_pct_change, 'MSFT', 'AAPL', xlim=limits)
-    # plt.savefig('5104OS_05_14.png', bbox_inches='tight', dpi=300)
-    #
-    #
-    # # In[36]:
-    #
+    # render_scatter_plot(daily_pct_change, "MSFT", "AAPL", xlim=limits)
+    # plt.savefig("images/5104OS_05_14.png", bbox_inches="tight", dpi=300)
     #
     # # DAL vs UAL
-    # render_scatter_plot(daily_pct_change, 'DAL', 'UAL', xlim=limits)
-    # plt.savefig('5104OS_05_15.png', bbox_inches='tight', dpi=300)
-    #
-    #
-    # # In[37]:
-    #
+    # render_scatter_plot(daily_pct_change, "DAL", "UAL", xlim=limits)
+    # plt.savefig("images/5104OS_05_15.png", bbox_inches="tight", dpi=300)
     #
     # # all stocks against each other, with a KDE in the diagonal
-    # _ = pd.scatter_matrix(daily_pct_change, diagonal='kde', alpha=0.1,
-    #                       figsize=(12,12));
-    # plt.savefig('5104OS_05_16.png', bbox_inches='tight', dpi=300)
+    # _ = pd.scatter_matrix(daily_pct_change, diagonal="kde", alpha=0.1, figsize=(12, 12))
+    # plt.savefig("images/5104OS_05_16.png", bbox_inches="tight", dpi=300)
     #
+    # ## Moving Windows
+    # msftAC = msft["2012"]["Adj Close"]
+    # ic(msftAC[:5])
     #
-    # # ## Moving Windows
+    # sample = msftAC["2012"]
+    # sample.plot(figsize=(6, 4))
+    # plt.savefig("images/5104OS_05_17.png", bbox_inches="tight", dpi=300)
     #
-    # # In[38]:
+    # sample.plot(figsize=(6, 4))
+    # pd.rolling_mean(sample, 5).plot(figsize=(6, 4))
+    # plt.savefig("images/5104OS_05_18.png", bbox_inches="tight", dpi=300)
     #
-    #
-    # msftAC = msft['2012']['Adj Close']
-    # msftAC[:5]
-    #
-    #
-    # # In[39]:
-    #
-    #
-    # sample = msftAC['2012']
-    # sample.plot(figsize=(12,8));
-    # plt.savefig('5104OS_05_17.png', bbox_inches='tight', dpi=300)
-    #
-    #
-    # # In[40]:
-    #
-    #
-    # sample.plot(figsize=(12,8))
-    # pd.rolling_mean(sample, 5).plot(figsize=(12,8));
-    # plt.savefig('5104OS_05_18.png', bbox_inches='tight', dpi=300)
-    #
-    #
-    # # In[41]:
-    #
-    #
-    # sample.plot(figsize=(12,8))
-    # pd.rolling_mean(sample, 5).plot(figsize=(12,8))
-    # pd.rolling_mean(sample, 10).plot(figsize=(12,8))
-    # pd.rolling_mean(sample, 20).plot(figsize=(12,8));
-    # plt.savefig('5104OS_05_19.png', bbox_inches='tight', dpi=300)
-    #
-    #
-    # # In[42]:
-    #
+    # sample.plot(figsize=(6, 4))
+    # pd.rolling_mean(sample, 5).plot(figsize=(6, 4))
+    # pd.rolling_mean(sample, 10).plot(figsize=(6, 4))
+    # pd.rolling_mean(sample, 20).plot(figsize=(6, 4))
+    # plt.savefig("images/5104OS_05_19.png", bbox_inches="tight", dpi=300)
     #
     # mean_abs_dev = lambda x: np.fabs(x - x.mean()).mean()
-    # pd.rolling_apply(sample, 5, mean_abs_dev).plot(figsize=(12,8));
-    # plt.savefig('5104OS_05_20.png', bbox_inches='tight', dpi=300)
+    # pd.rolling_apply(sample, 5, mean_abs_dev).plot(figsize=(6, 4))
+    # plt.savefig("images/5104OS_05_20.png", bbox_inches="tight", dpi=300)
     #
-    #
-    # # In[43]:
-    #
-    #
-    # expanding_mean = lambda x: pd.rolling_mean(x, len(x),
-    #                                            min_periods=1)
+    # expanding_mean = lambda x: pd.rolling_mean(x, len(x), min_periods=1)
     # sample.plot()
-    # pd.expanding_mean(sample).plot(figsize=(12,8));
-    # plt.savefig('5104OS_05_21.png', bbox_inches='tight', dpi=300)
+    # pd.expanding_mean(sample).plot(figsize=(6, 4))
+    # plt.savefig("images/5104OS_05_21.png", bbox_inches="tight", dpi=300)
     #
-    #
-    # # ## Volatility calculation
-    #
-    # # In[44]:
-    #
-    #
+    # ## Volatility calculation
     # # use a minimum of 75 days
     # min_periods = 75
     # # calculate the rolling standard deviation
-    # vol = pd.rolling_std(daily_pct_change, min_periods) *                      np.sqrt(min_periods)
+    # vol = pd.rolling_std(daily_pct_change, min_periods) * np.sqrt(min_periods)
     # # plot it
-    # _ = vol.plot(figsize=(10, 8));
-    # plt.savefig('5104OS_05_22.png', bbox_inches='tight', dpi=300)
+    # _ = vol.plot(figsize=(6, 6))
+    # plt.savefig("images/5104OS_05_22.png", bbox_inches="tight", dpi=300)
     #
-    #
-    # # ## Rolling correlation of returns
-    #
-    # # In[45]:
-    #
-    #
+    # ## Rolling correlation of returns
     # # one year (252 days) rolling correlation of AAPL and MSFT
-    # rolling_corr = pd.rolling_corr(daily_pct_change['AAPL'],
-    #                                daily_pct_change['MSFT'],
-    #                                window=252).dropna()
-    # rolling_corr[251:] #first 251 are NaN
-    #
-    #
-    # # In[46]:
-    #
+    # rolling_corr = pd.rolling_corr(
+    #     daily_pct_change["AAPL"], daily_pct_change["MSFT"], window=252
+    # ).dropna()
+    # ic(rolling_corr[251:])  # first 251 are NaN
     #
     # # plot the rolling correlation
-    # _ = rolling_corr.plot(figsize=(12,8));
-    # plt.savefig('5104OS_05_23.png', bbox_inches='tight', dpi=300)
+    # _ = rolling_corr.plot(figsize=(6, 4))
+    # plt.savefig("images/5104OS_05_23.png", bbox_inches="tight", dpi=300)
     #
-    #
-    # # ## Least squares regression of returns (beta)
-    #
-    # # In[47]:
-    #
-    #
+    # ## Least squares regression of returns (beta)
     # # least squares on the returns of AAPL and MSFT
-    # model = pd.ols(y=daily_pct_change['AAPL'],
-    #                x={'MSFT': daily_pct_change['MSFT']},
-    #                window=250)
-    # model
-    #
-    #
-    # # In[48]:
-    #
+    # model = pd.ols(y=daily_pct_change["AAPL"], x={"MSFT": daily_pct_change["MSFT"]}, window=250)
+    # ic(model)
     #
     # # what is the beta?
-    # model.beta[0:5]
+    # ic(model.beta[0:5])
     #
+    # _ = model.beta["MSFT"].plot(figsize=(12, 8))
+    # plt.savefig("images/5104OS_05_24.png", bbox_inches="tight", dpi=300)
     #
-    # # In[49]:
-    #
-    #
-    # _ = model.beta['MSFT'].plot(figsize=(12, 8)); # plot the beta
-    # plt.savefig('5104OS_05_24.png', bbox_inches='tight', dpi=300)
-    #
-    #
-    # # # Comparing stocks to the S&P 500
-    #
-    # # In[50]:
-    #
-    #
+    # # Comparing stocks to the S&P 500
     # # we need to calculate the pct change on the close for S&P 500
-    # sp_500_dpc = sp_500['Adj Close'].pct_change().fillna(0)
-    # sp_500_dpc[:5]
-    #
-    #
-    # # In[51]:
-    #
+    # sp_500_dpc = sp_500["Adj Close"].pct_change().fillna(0)
+    # ic(sp_500_dpc[:5])
     #
     # # now concat the S&P data with the other daily pct values
     # dpc_all = pd.concat([sp_500_dpc, daily_pct_change], axis=1)
-    # dpc_all.rename(columns={'Adj Close': 'SP500'}, inplace=True)
-    # dpc_all[:5]
-    #
-    #
-    # # In[52]:
-    #
+    # dpc_all.rename(columns={"Adj Close": "SP500"}, inplace=True)
+    # ic(dpc_all[:5])
     #
     # # from all the daily, calculate the cumulative
     # cdr_all = (1 + dpc_all).cumprod()
-    # cdr_all[:5]
-    #
-    #
-    # # In[53]:
-    #
+    # ic(cdr_all[:5])
     #
     # # calculate the correlations
     # dpc_corrs = dpc_all.corr()
-    # dpc_corrs
-    #
-    #
-    # # In[54]:
-    #
+    # ic(dpc_corrs)
     #
     # # how well did each stock relate to the S&P 500?
-    # dpc_corrs.ix['SP500']
-    #
-    #
-    # # In[55]:
-    #
+    # ic(dpc_corrs.ix["SP500"])
     #
     # # plot GE/UAL against S&P500
-    # _ = cdr_all[['SP500', 'GE', 'UAL']].plot(figsize=(12,8));
-    # plt.savefig('5104OS_05_25.png', bbox_inches='tight', dpi=300)
-    #
-    #
-    # # In[56]:
-    #
+    # _ = cdr_all[["SP500", "GE", "UAL"]].plot(figsize=(6, 4))
+    # plt.savefig("images/5104OS_05_25.png", bbox_inches="tight", dpi=300)
     #
     # # GE vs S&P 500
-    # render_scatter_plot(dpc_all, 'GE', 'SP500')
-    # plt.savefig('5104OS_05_26.png', bbox_inches='tight', dpi=300)
-    #
-    #
-    # # In[57]:
-    #
+    # render_scatter_plot(dpc_all, "GE", "SP500")
+    # plt.savefig("images/5104OS_05_26.png", bbox_inches="tight", dpi=300)
     #
     # # and UAL vs S&P 500
-    # render_scatter_plot(dpc_all, 'UAL', 'SP500')
-    # plt.savefig('5104OS_05_27.png', bbox_inches='tight', dpi=300)
-    #
+    # render_scatter_plot(dpc_all, "UAL", "SP500")
+    # plt.savefig("images/5104OS_05_27.png", bbox_inches="tight", dpi=300)
