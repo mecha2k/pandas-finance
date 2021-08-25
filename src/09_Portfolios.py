@@ -17,58 +17,69 @@ pd.set_option("precision", 3)
 
 if __name__ == "__main__":
 
-    def create_portfolio(tickers, weights=None):
-        if weights is None:
-            shares = np.ones(len(tickers)) / len(tickers)
-        portfolio = pd.DataFrame({"Tickers": tickers, "Weights": weights}, index=tickers)
-        return portfolio
+    # def create_portfolio(tickers, weights=None):
+    #     if weights is None:
+    #         shares = np.ones(len(tickers)) / len(tickers)
+    #     portfolio = pd.DataFrame({"Tickers": tickers, "Weights": weights}, index=tickers)
+    #     return portfolio
+    #
+    # def calculate_weighted_portfolio_value(portfolio, returns, name="Value"):
+    #     total_weights = portfolio.Weights.sum()
+    #     weighted_returns = returns * (portfolio.Weights / total_weights)
+    #     return pd.DataFrame({name: weighted_returns.sum(axis=1)})
+    #
+    # portfolio = create_portfolio(["Stock A", "Stock B"], [1, 1])
+    # ic(portfolio)
+    #
+    # returns = pd.DataFrame(
+    #     {"Stock A": [0.1, 0.24, 0.05, -0.02, 0.2], "Stock B": [-0.15, -0.2, -0.01, 0.04, -0.15]}
+    # )
+    # ic(returns)
+    #
+    # wr = calculate_weighted_portfolio_value(portfolio, returns, "Value")
+    # with_value = pd.concat([returns, wr], axis=1)
+    # ic(with_value)
+    # ic(with_value.std())
+    #
+    # def plot_portfolio_returns(returns, title=None):
+    #     returns.plot(figsize=(12, 8))
+    #     plt.xlabel("Year")
+    #     plt.ylabel("Returns")
+    #     if title is not None:
+    #         plt.title(title)
+    #     plt.show()
+    #     plt.savefig("images/ch09/5104OS_09_02.png", dpi=300)
+    #
+    # plot_portfolio_returns(with_value)
+    # ic(returns.corr())
 
-    def calculate_weighted_portfolio_value(portfolio, returns, name="Value"):
-        total_weights = portfolio.Weights.sum()
-        weighted_returns = returns * (portfolio.Weights / total_weights)
-        return pd.DataFrame({name: weighted_returns.sum(axis=1)})
+    # get_yf = lambda ticker: yf.download(ticker, start="2010-01-01", end="2011-03-01")
+    # data = list(map(get_yf, ["MSFT", "AAPL", "KO"]))
+    # ic(data[0])
+    # data = pd.concat(data, keys=["MSFT", "AAPL", "KO"], names=["Ticker", "Date"])
+    # data.info()
+    # ic(data.head())
+    #
+    # p = data["Adj Close"].reset_index()
+    # ic(p)
+    # pivoted = p.pivot(index="Date", columns="Ticker", values="Adj Close")
+    # ic(pivoted)
 
-    portfolio = create_portfolio(["Stock A", "Stock B"], [1, 1])
-    ic(portfolio)
-
-    returns = pd.DataFrame(
-        {"Stock A": [0.1, 0.24, 0.05, -0.02, 0.2], "Stock B": [-0.15, -0.2, -0.01, 0.04, -0.15]}
-    )
-    ic(returns)
-
-    wr = calculate_weighted_portfolio_value(portfolio, returns, "Value")
-    with_value = pd.concat([returns, wr], axis=1)
-    ic(with_value)
-    ic(with_value.std())
-
-    def plot_portfolio_returns(returns, title=None):
-        returns.plot(figsize=(12, 8))
-        plt.xlabel("Year")
-        plt.ylabel("Returns")
-        if title is not None:
-            plt.title(title)
-        plt.show()
-        plt.savefig("images/ch09/5104OS_09_02.png", dpi=300)
-
-    plot_portfolio_returns(with_value)
-    ic(returns.corr())
-
-    # Computing an Efficient Portfolio
-
-    def get_historical_closes(ticker, start_date, end_date):
-        # get the data for the tickers.  This will be a panel
-        p = web.DataReader(ticker, "yahoo", start_date, end_date)
-        # convert the panel to a DataFrame and selection only Adj Close
-        # while making all index levels columns
-        d = p.to_frame()["Adj Close"].reset_index()
-        # rename the columns
-        d.rename(columns={"minor": "Ticker", "Adj Close": "Close"}, inplace=True)
-        # pivot each ticker to a column
-        pivoted = d.pivot(index="Date", columns="Ticker")
-        # and drop the one level on the columns
-        pivoted.columns = pivoted.columns.droplevel(0)
+    def get_historical_closes(tickers, start, end):
+        src_data = "data/yf_data1.pkl"
+        try:
+            data = pd.read_pickle(src_data)
+            print("data reading from file...")
+        except FileNotFoundError:
+            get_yf = lambda ticker: yf.download(ticker, start=start, end=end)
+            data = list(map(get_yf, tickers))
+            data = pd.concat(data, keys=tickers, names=["Ticker", "Date"])
+            data.to_pickle(src_data)
+        data = data["Adj Close"].reset_index()
+        pivoted = data.pivot(index="Date", columns="Ticker", values="Adj Close")
         return pivoted
 
+    # Computing an Efficient Portfolio
     closes = get_historical_closes(["MSFT", "AAPL", "KO"], "2010-01-01", "2014-12-31")
     ic(closes[:5])
 
@@ -118,20 +129,22 @@ if __name__ == "__main__":
     def y_f(x):
         return 2 + x ** 2
 
-    ic(scopt.fmin(y_f, 1000))
+    ic(scipy.optimize.fmin(y_f, 1000))
 
     ## Constructing an optimal portfolio
     def negative_sharpe_ratio_n_minus_1_stock(weights, returns, risk_free_rate):
-        weights2 = sp.append(weights, 1 - np.sum(weights))
+        weights2 = np.append(weights, 1 - np.sum(weights))
         return -sharpe_ratio(returns, weights2, risk_free_rate)
 
     def optimize_portfolio(returns, risk_free_rate):
         # start with equal weights
         w0 = np.ones(returns.columns.size - 1, dtype=float) * 1.0 / returns.columns.size
         # minimize the negative sharpe value
-        w1 = scopt.fmin(negative_sharpe_ratio_n_minus_1_stock, w0, args=(returns, risk_free_rate))
+        w1 = scipy.optimize.fmin(
+            negative_sharpe_ratio_n_minus_1_stock, w0, args=(returns, risk_free_rate)
+        )
         # build final set of weights
-        final_w = sp.append(w1, 1 - np.sum(w1))
+        final_w = np.append(w1, 1 - np.sum(w1))
         # and calculate the final, optimized, sharpe ratio
         final_sharpe = sharpe_ratio(returns, final_w, risk_free_rate)
         return final_w, final_sharpe
@@ -160,7 +173,7 @@ if __name__ == "__main__":
             weights = np.ones(nstocks) / nstocks
             bounds = [(0, 1) for i in np.arange(nstocks)]
             constraints = {"type": "eq", "fun": lambda W: np.sum(W) - 1}
-            results = scopt.minimize(
+            results = scipy.optimize.minimize(
                 objfun,
                 weights,
                 (returns, r),
@@ -169,7 +182,7 @@ if __name__ == "__main__":
                 bounds=bounds,
             )
             if not results.success:  # handle error
-                raise Exception(result.message)
+                raise Exception(results.message)
             result_means.append(np.round(r, 4))  # 4 decimal places
             std_ = np.round(np.std(np.sum(returns * results.x, axis=1)), 6)
             result_stds.append(std_)
