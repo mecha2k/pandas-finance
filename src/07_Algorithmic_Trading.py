@@ -85,6 +85,7 @@ if __name__ == "__main__":
             BuyApple.trace = trace
             super(BuyApple, self).__init__()
 
+        @staticmethod
         def initialize(context):
             if BuyApple.trace:
                 print("---> initialize")
