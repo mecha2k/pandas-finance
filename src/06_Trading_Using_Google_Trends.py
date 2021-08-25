@@ -47,11 +47,14 @@ if __name__ == "__main__":
     # djia = quandl.get("YAHOO/INDEX_DJI", trim_start="2004-01-01", trim_end="2011-03-05")
     # ic(djia)
 
-    djia = pd.read_csv("data/djia.csv", index_col=0)
+    djia = pd.read_csv("data/djia.csv", index_col=0, parse_dates=True)
     ic(djia[:3])
 
     djia_closes = djia["Close"].reset_index()
     ic(djia_closes[:3])
+
+    data.info()
+    djia_closes.info()
 
     data = pd.merge(data, djia_closes, left_on="DJIADate", right_on="Date")
     data.drop(["DJIADate"], inplace=True, axis=1)
@@ -61,6 +64,7 @@ if __name__ == "__main__":
     # examine authors versus our DJIA data
     data[["DJIAClose", "Close"]].plot(figsize=(12, 8))
     plt.savefig("images/ch06/5104OS_06_02.png", bbox_inches="tight", dpi=300)
+    plt.close()
 
     ic((data["DJIAClose"] - data["Close"]).describe())
     ic(data[["DJIAClose", "Close"]].corr())
@@ -96,7 +100,6 @@ if __name__ == "__main__":
     ax2 = ax1.twinx()
     ax2.plot(combined_trends.index, combined_trends.debtO, color="r")
     plt.savefig("images/ch06/5104OS_06_05.png", bbox_inches="tight", dpi=300)
-    plt.show()
 
     # Generate the order signals
     base = final.reset_index().set_index("GoogleWE")
@@ -104,8 +107,8 @@ if __name__ == "__main__":
     ic(base[:3])
 
     # calculate the rolling mean of the previous three weeks for each week
-    base["PMA"] = pd.rolling_mean(base.debtP.shift(1), 3)
-    base["OMA"] = pd.rolling_mean(base.debtO.shift(1), 3)
+    base["PMA"] = base.debtP.shift(1).rolling(window=3).mean()
+    base["OMA"] = base.debtO.shift(1).rolling(window=3).mean()
     ic(base[:5])
 
     # calculate the order signals for the papers data
