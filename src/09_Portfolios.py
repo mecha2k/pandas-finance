@@ -47,23 +47,22 @@ if __name__ == "__main__":
         plt.ylabel("Returns")
         if title is not None:
             plt.title(title)
-        plt.show()
         plt.savefig("images/ch09/5104OS_09_02.png", dpi=300)
 
     plot_portfolio_returns(with_value)
     ic(returns.corr())
 
-    get_yf = lambda ticker: yf.download(ticker, start="2010-01-01", end="2011-03-01")
-    data = list(map(get_yf, ["MSFT", "AAPL", "KO"]))
-    ic(data[0])
-    data = pd.concat(data, keys=["MSFT", "AAPL", "KO"], names=["Ticker", "Date"])
-    data.info()
-    ic(data.head())
-
-    p = data["Adj Close"].reset_index()
-    ic(p)
-    pivoted = p.pivot(index="Date", columns="Ticker", values="Adj Close")
-    ic(pivoted)
+    # get_yf = lambda ticker: yf.download(ticker, start="2010-01-01", end="2011-03-01")
+    # data = list(map(get_yf, ["MSFT", "AAPL", "KO"]))
+    # ic(data[0])
+    # data = pd.concat(data, keys=["MSFT", "AAPL", "KO"], names=["Ticker", "Date"])
+    # data.info()
+    # ic(data.head())
+    #
+    # p = data["Adj Close"].reset_index()
+    # ic(p)
+    # pivoted = p.pivot(index="Date", columns="Ticker", values="Adj Close")
+    # ic(pivoted)
 
     def get_historical_closes(tickers, start, end):
         src_data = "data/yf_data1.pkl"
@@ -224,7 +223,7 @@ if __name__ == "__main__":
     plt.savefig("images/ch09/5104OS_09_23.png", bbox_inches="tight", dpi=300)
 
     # get the z-score for 95%
-    z = spstats.norm.ppf(0.95)
+    z = stats.norm.ppf(0.95)
     ic(z)
 
     # our position is 1000 shares of AAPL at the price on 2014-22-31
